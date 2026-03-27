@@ -69,9 +69,19 @@
             }
         };
 
-        function enviarSinal() {
-            window.Telegram.WebApp.sendData("ASSISTIU_OK");
-        }
-    </script>
-</body>
-</html>
+function enviarSinal() {
+    const urlParams = new URLSearchParams(window.location.search);
+    // O Telegram passa os dados do usuário na URL do WebApp
+    const initData = window.Telegram.WebApp.initData;
+    
+    // Avisa o jogador que está processando
+    document.getElementById('quizBtn').innerText = "⌛ ENVIANDO...";
+    document.getElementById('quizBtn').disabled = true;
+
+    // Fecha o Mini App - o Robô vai receber o sinal pelo backend
+    window.Telegram.WebApp.sendData("ASSISTIU_OK"); 
+    
+    // Como garantia para Inline Buttons, vamos fechar o app
+    // O robô vai disparar a pergunta assim que detectar o fechamento ou o sinal
+    window.Telegram.WebApp.close();
+}
