@@ -6,40 +6,22 @@
     <title>Empire Hits Player</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #1a0033; color: #d4af37; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
+        body { background: #1a0033; color: #d4af37; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
         .container { width: 100%; max-width: 450px; }
-        h2 { letter-spacing: 2px; text-transform: uppercase; margin-top: 0; }
-        
-        video { 
-            width: 100%; 
-            max-height: 65vh; 
-            border: 2px solid #d4af37; 
-            border-radius: 15px; 
-            background: #000; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            object-fit: contain; 
-        }
-
-        .btn-ready { background: #d4af37; color: #1a0033; border: none; padding: 18px 30px; border-radius: 40px; font-weight: bold; font-size: 16px; margin-top: 25px; width: 100%; display: none; cursor: pointer; animation: pulse 1.5s infinite; }
+        h2 { letter-spacing: 2px; text-transform: uppercase; margin-top: 0; font-size: 22px; }
+        video { width: 100%; max-height: 60vh; border: 2px solid #d4af37; border-radius: 15px; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.5); object-fit: contain; }
+        .btn-ready { background: #d4af37; color: #1a0033; border: none; padding: 18px 30px; border-radius: 40px; font-weight: bold; font-size: 16px; margin-top: 25px; width: 100%; display: none; cursor: pointer; animation: pulse 1.5s infinite; text-transform: uppercase; }
         #status { font-size: 14px; color: #bbb; margin-top: 15px; line-height: 1.4; }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
-            100% { transform: scale(1); }
-        }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Empire Hits</h2>
-        
-        <video id="empireVideo" playsinline controls preload="metadata">
+        <video id="empireVideo" playsinline controls preload="auto">
             <source src="https://www.dropbox.com/scl/fi/37yyt40zzagodb5mwbyk4/0327-1.mp4?rlkey=5g3phccxtovo53ny3oa0xyrpg&st=hk0ip0ke&raw=1" type="video/mp4">
-            Seu navegador não suporta vídeos.
         </video>
-
-        <p id="status">Assista 80% do vídeo com som ligado<br>para liberar sua pergunta oficial.</p>
+        <p id="status">Assista 80% do episódio <b>com som ligado</b><br>para liberar sua pergunta oficial.</p>
         <button id="quizBtn" class="btn-ready" onclick="enviarSinal()">🏆 LIBERAR PERGUNTA</button>
     </div>
 
@@ -59,23 +41,25 @@
 
         video.ontimeupdate = function() {
             if (!video.seeking) { lastTime = video.currentTime; }
+            
             let progresso = video.currentTime / video.duration;
             let volumeOk = !video.muted && video.volume > 0.1;
 
             if (progresso >= 0.8 && volumeOk && !metaBatida) {
                 metaBatida = true;
                 btn.style.display = 'block';
-                status.innerHTML = "✅ <b>Visualização validada!</b><br>Clique no botão para receber o Quiz.";
+                status.innerHTML = "✅ <b>Episódio Validado!</b><br>Clique abaixo para o Quiz.";
             }
         };
 
-function enviarSinal() {
-    // 1. Envia o sinal para o Telegram (isso faz o bot receber o web_app_data)
-    window.Telegram.WebApp.sendData("ASSISTIU_OK");
-    
-    // 2. Fecha o Mini App imediatamente
-    // Isso garante que o player suma do histórico e o jogador veja o Quiz
-    setTimeout(() => {
-        window.Telegram.WebApp.close();
-    }, 300);
-}
+        function enviarSinal() {
+            // Envia o dado para o bot
+            window.Telegram.WebApp.sendData("ASSISTIU_OK");
+            // Fecha a janelinha do Mini App após 300ms
+            setTimeout(() => {
+                window.Telegram.WebApp.close();
+            }, 300);
+        }
+    </script>
+</body>
+</html>
