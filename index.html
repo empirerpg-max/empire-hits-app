@@ -70,30 +70,12 @@
         };
 
 function enviarSinal() {
-    const btn = document.getElementById('quizBtn');
-    btn.innerText = "⌛ VALIDANDO...";
-    btn.disabled = true;
-
-    // Pega os dados do usuário que o Telegram já injeta na página
-    const initData = window.Telegram.WebApp.initData;
-
-    // Manda um sinal direto para o seu Google Apps Script
-    // IMPORTANTE: Substitua a URL abaixo pela URL DO SEU WEB APP (a que termina em /exec)
-    const scriptURL = "SUA_URL_DO_GOOGLE_APPS_SCRIPT_AQUI";
-
-    fetch(scriptURL, {
-        method: 'POST',
-        mode: 'no-cors', // Importante para não dar erro de segurança
-        body: JSON.stringify({
-            "action": "assistiu_video",
-            "initData": initData
-        })
-    }).then(() => {
-        // Depois de avisar o script, fechamos o app
-        setTimeout(() => {
-            window.Telegram.WebApp.close();
-        }, 500);
-    }).catch(err => {
-        alert("Erro ao enviar: " + err);
-    });
+    // 1. Envia o sinal para o Telegram (isso faz o bot receber o web_app_data)
+    window.Telegram.WebApp.sendData("ASSISTIU_OK");
+    
+    // 2. Fecha o Mini App imediatamente
+    // Isso garante que o player suma do histórico e o jogador veja o Quiz
+    setTimeout(() => {
+        window.Telegram.WebApp.close();
+    }, 300);
 }
