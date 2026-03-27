@@ -21,7 +21,7 @@
         <video id="empireVideo" playsinline controls preload="auto">
             <source src="https://www.dropbox.com/scl/fi/37yyt40zzagodb5mwbyk4/0327-1.mp4?rlkey=5g3phccxtovo53ny3oa0xyrpg&st=hk0ip0ke&raw=1" type="video/mp4">
         </video>
-        <p id="status">Assista 80% do episódio <b>com som ligado</b><br>para liberar sua pergunta oficial.</p>
+        <p id="status">Assista 80% do episódio com som ligado<br>para liberar sua pergunta oficial.</p>
         <button id="quizBtn" class="btn-ready" onclick="enviarSinal()">🏆 LIBERAR PERGUNTA</button>
     </div>
 
@@ -41,7 +41,6 @@
 
         video.ontimeupdate = function() {
             if (!video.seeking) { lastTime = video.currentTime; }
-            
             let progresso = video.currentTime / video.duration;
             let volumeOk = !video.muted && video.volume > 0.1;
 
@@ -53,12 +52,26 @@
         };
 
         function enviarSinal() {
-            // Envia o dado para o bot
-            window.Telegram.WebApp.sendData("ASSISTIU_OK");
-            // Fecha a janelinha do Mini App após 300ms
-            setTimeout(() => {
-                window.Telegram.WebApp.close();
-            }, 300);
+            const user = window.Telegram.WebApp.initDataUnsafe.user;
+            const scriptURL = "https://script.google.com/macros/s/AKfycbx2Prro_COe0hYNIpx2aVsNMPjFjNC5UqxttuDN3SkCTFhCLzajiJ7cfjp3Ul3zYuA/exec";
+
+            if (!user) { alert("Erro: Abra pelo Telegram!"); return; }
+
+            btn.innerText = "⌛ VALIDANDO...";
+            btn.disabled = true;
+
+            // Envia o sinal direto para o Google Apps Script
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    "action": "ASSISTIU_OK",
+                    "userId": user.id,
+                    "nome": user.first_name
+                })
+            }).then(() => {
+                setTimeout(() => { window.Telegram.WebApp.close(); }, 500);
+            });
         }
     </script>
 </body>
