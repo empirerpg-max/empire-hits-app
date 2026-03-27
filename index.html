@@ -47,32 +47,33 @@
             if (progresso >= 0.8 && volumeOk && !metaBatida) {
                 metaBatida = true;
                 btn.style.display = 'block';
-                status.innerHTML = "✅ <b>Episódio Validado!</b><br>Clique abaixo para o Quiz.";
+                status.innerHTML = "✅ <b>Episódio Validado!</b><br>Clique abaixo para receber a pergunta.";
             }
         };
 
-        function enviarSinal() {
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
-            const scriptURL = "https://script.google.com/macros/s/AKfycbx2Prro_COe0hYNIpx2aVsNMPjFjNC5UqxttuDN3SkCTFhCLzajiJ7cfjp3Ul3zYuA/exec";
+function enviarSinal() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mId = urlParams.get('msgid');
+    const initData = window.Telegram.WebApp.initData;
+    
+    // 🚨 COLOQUE A URL QUE TERMINA EM /exec AQUI
+    const scriptURL = "https://script.google.com/macros/s/AKfycbx2Prro_COe0hYNIpx2aVsNMPjFjNC5UqxttuDN3SkCTFhCLzajiJ7cfjp3Ul3zYuA/exec";
 
-            if (!user) { alert("Erro: Abra pelo Telegram!"); return; }
+    const btn = document.getElementById('quizBtn');
+    btn.innerText = "⌛ VALIDANDO...";
+    btn.disabled = true;
 
-            btn.innerText = "⌛ VALIDANDO...";
-            btn.disabled = true;
-
-            // Envia o sinal direto para o Google Apps Script
-            fetch(scriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({
-                    "action": "ASSISTIU_OK",
-                    "userId": user.id,
-                    "nome": user.first_name
-                })
-            }).then(() => {
-                setTimeout(() => { window.Telegram.WebApp.close(); }, 500);
-            });
-        }
-    </script>
-</body>
-</html>
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({
+            "action": "ASSISTIU_OK",
+            "initData": initData,
+            "msgId": mId
+        })
+    }).then(() => {
+        setTimeout(() => { window.Telegram.WebApp.close(); }, 500);
+    }).catch(err => {
+        alert("Erro de conexão.");
+    });
+}
