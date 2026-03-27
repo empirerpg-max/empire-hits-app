@@ -53,27 +53,23 @@
 
 function enviarSinal() {
     const urlParams = new URLSearchParams(window.location.search);
-    const mId = urlParams.get('msgid');
-    const initData = window.Telegram.WebApp.initData;
+    const mId = urlParams.get('msgid'); // Pega o ID da mensagem para apagar
     
-    // 🚨 COLOQUE A URL QUE TERMINA EM /exec AQUI
-    const scriptURL = "https://script.google.com/macros/s/AKfycbx2Prro_COe0hYNIpx2aVsNMPjFjNC5UqxttuDN3SkCTFhCLzajiJ7cfjp3Ul3zYuA/exec";
+    // 🚨 SUBSTITUA 'EmpireHitsBot' PELO NOME DE USUÁRIO DO SEU BOT (sem o @)
+    const botUsername = "EmpireHitsBot"; 
 
     const btn = document.getElementById('quizBtn');
-    btn.innerText = "⌛ VALIDANDO...";
+    btn.innerText = "⌛ REDIRECIONANDO...";
     btn.disabled = true;
 
-    fetch(scriptURL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({
-            "action": "ASSISTIU_OK",
-            "initData": initData,
-            "msgId": mId
-        })
-    }).then(() => {
-        setTimeout(() => { window.Telegram.WebApp.close(); }, 500);
-    }).catch(err => {
-        alert("Erro de conexão.");
-    });
+    // O pulo do gato: Cria um link que volta para o bot já validando o usuário
+    // O comando 'start' leva o ID da mensagem para o bot saber o que apagar
+    const deepLink = "https://t.me/" + botUsername + "?start=VALIDADO_" + mId;
+
+    // Abre o link e fecha o app
+    window.Telegram.WebApp.openTelegramLink(deepLink);
+    
+    setTimeout(() => {
+        window.Telegram.WebApp.close();
+    }, 500);
 }
