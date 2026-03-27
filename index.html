@@ -70,18 +70,30 @@
         };
 
 function enviarSinal() {
-    const urlParams = new URLSearchParams(window.location.search);
-    // O Telegram passa os dados do usuário na URL do WebApp
-    const initData = window.Telegram.WebApp.initData;
-    
-    // Avisa o jogador que está processando
-    document.getElementById('quizBtn').innerText = "⌛ ENVIANDO...";
-    document.getElementById('quizBtn').disabled = true;
+    const btn = document.getElementById('quizBtn');
+    btn.innerText = "⌛ VALIDANDO...";
+    btn.disabled = true;
 
-    // Fecha o Mini App - o Robô vai receber o sinal pelo backend
-    window.Telegram.WebApp.sendData("ASSISTIU_OK"); 
-    
-    // Como garantia para Inline Buttons, vamos fechar o app
-    // O robô vai disparar a pergunta assim que detectar o fechamento ou o sinal
-    window.Telegram.WebApp.close();
+    // Pega os dados do usuário que o Telegram já injeta na página
+    const initData = window.Telegram.WebApp.initData;
+
+    // Manda um sinal direto para o seu Google Apps Script
+    // IMPORTANTE: Substitua a URL abaixo pela URL DO SEU WEB APP (a que termina em /exec)
+    const scriptURL = "SUA_URL_DO_GOOGLE_APPS_SCRIPT_AQUI";
+
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors', // Importante para não dar erro de segurança
+        body: JSON.stringify({
+            "action": "assistiu_video",
+            "initData": initData
+        })
+    }).then(() => {
+        // Depois de avisar o script, fechamos o app
+        setTimeout(() => {
+            window.Telegram.WebApp.close();
+        }, 500);
+    }).catch(err => {
+        alert("Erro ao enviar: " + err);
+    });
 }
