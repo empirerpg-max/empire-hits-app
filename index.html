@@ -21,7 +21,7 @@
         <video id="empireVideo" playsinline controls preload="auto">
             <source src="https://www.dropbox.com/scl/fi/37yyt40zzagodb5mwbyk4/0327-1.mp4?rlkey=5g3phccxtovo53ny3oa0xyrpg&st=hk0ip0ke&raw=1" type="video/mp4">
         </video>
-        <p id="status">Assista 80% do episódio com som ligado<br>para liberar sua pergunta oficial.</p>
+        <p id="status">Assista 80% do episódio <b>com som</b><br>para liberar sua pergunta oficial.</p>
         <button id="quizBtn" class="btn-ready" onclick="enviarSinal()">🏆 LIBERAR PERGUNTA</button>
     </div>
 
@@ -35,6 +35,14 @@
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
 
+        function mostrarBotao() {
+            if (!metaBatida) {
+                metaBatida = true;
+                btn.style.display = 'block';
+                status.innerHTML = "✅ <b>Episódio Validado!</b><br>Clique abaixo para o Quiz.";
+            }
+        }
+
         video.onseeking = function() {
             if (video.currentTime > lastTime) { video.currentTime = lastTime; }
         };
@@ -42,34 +50,28 @@
         video.ontimeupdate = function() {
             if (!video.seeking) { lastTime = video.currentTime; }
             let progresso = video.currentTime / video.duration;
-            let volumeOk = !video.muted && video.volume > 0.1;
+            let volumeOk = !video.muted && video.volume > 0;
 
-            if (progresso >= 0.8 && volumeOk && !metaBatida) {
-                metaBatida = true;
-                btn.style.display = 'block';
-                status.innerHTML = "✅ <b>Episódio Validado!</b><br>Clique abaixo para receber a pergunta.";
-            }
+            if (progresso >= 0.8 && volumeOk) { mostrarBotao(); }
         };
 
-function enviarSinal() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const mId = urlParams.get('msgid'); // Pega o ID da mensagem para apagar
-    
-    // 🚨 SUBSTITUA 'EmpireHitsBot' PELO NOME DE USUÁRIO DO SEU BOT (sem o @)
-    const botUsername = "EmpireHitsBot"; 
+        // TRAVA DE SEGURANÇA: Se o vídeo acabar, o botão TEM que aparecer
+        video.onended = function() { mostrarBotao(); };
 
-    const btn = document.getElementById('quizBtn');
-    btn.innerText = "⌛ REDIRECIONANDO...";
-    btn.disabled = true;
+        function enviarSinal() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mId = urlParams.get('msgid');
+            const botUsername = "EmpireHitsBot"; // CONFIRME SE O SEU BOT É ESSE MESMO
 
-    // O pulo do gato: Cria um link que volta para o bot já validando o usuário
-    // O comando 'start' leva o ID da mensagem para o bot saber o que apagar
-    const deepLink = "https://t.me/" + botUsername + "?start=VALIDADO_" + mId;
+            btn.innerText = "⌛ REDIRECIONANDO...";
+            btn.disabled = true;
 
-    // Abre o link e fecha o app
-    window.Telegram.WebApp.openTelegramLink(deepLink);
-    
-    setTimeout(() => {
-        window.Telegram.WebApp.close();
-    }, 500);
-}
+            // Deep Link para voltar ao chat e avisar o robô
+            const deepLink = "https://t.me/" + botUsername + "?start=VALIDADO_" + mId;
+            window.Telegram.WebApp.openTelegramLink(deepLink);
+            
+            setTimeout(() => { window.Telegram.WebApp.close(); }, 500);
+        }
+    </script>
+</body>
+</html>
