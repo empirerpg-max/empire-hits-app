@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Empire Hits Player</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #1a0033; color: #d4af37; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; overflow: hidden; }
+        .container { max-width: 500px; margin: auto; }
+        video { width: 100%; border: 2px solid #d4af37; border-radius: 12px; background: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
+        .btn-ready { background: #d4af37; color: #1a0033; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; font-size: 16px; margin-top: 20px; width: 100%; display: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        #status { font-size: 14px; color: #bbb; margin-top: 15px; }
+        h2 { letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Empire Hits</h2>
+        
+        <video id="empireVideo" playsinline controlsList="nodownload">
+            <source src="LINK_DIRETO_DO_SEU_VIDEO_AQUI.mp4" type="video/mp4">
+            Seu navegador não suporta vídeos.
+        </video>
+
+        <p id="status">Assista pelo menos 80% do vídeo com som para liberar a pergunta.</p>
+        <button id="quizBtn" class="btn-ready" onclick="enviarSinal()">🏆 LIBERAR PERGUNTA</button>
+    </div>
+
+    <script>
+        const video = document.getElementById('empireVideo');
+        const btn = document.getElementById('quizBtn');
+        const status = document.getElementById('status');
+        let metaBatida = false;
+        let lastTime = 0;
+
+        // Inicializa o Mini App do Telegram
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+
+        // Trava para não deixar pular o vídeo (Anti-Cheat)
+        video.onseeking = function() {
+            if (video.currentTime > lastTime) {
+                video.currentTime = lastTime;
+            }
+        };
+
+        // Monitora tempo e áudio
+        video.ontimeupdate = function() {
+            if (!video.seeking) { lastTime = video.currentTime; }
+            
+            let progresso = video.currentTime / video.duration;
+            let volumeOk = !video.muted && video.volume > 0.1;
+
+            if (progresso >= 0.8 && volumeOk && !metaBatida) {
+                metaBatida = true;
+                btn.style.display = 'block';
+                status.innerHTML = "✅ <b>Visualização validada!</b><br>Clique no botão abaixo para receber sua pergunta.";
+            }
+        };
+
+        function enviarSinal() {
+            // Envia o comando para o Bot e fecha o WebApp
+            window.Telegram.WebApp.sendData("ASSISTIU_OK");
+        }
+    </script>
+</body>
+</html>
