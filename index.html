@@ -12,16 +12,16 @@
         video { width: 100%; max-height: 60vh; border: 2px solid #d4af37; border-radius: 15px; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.5); object-fit: contain; }
         .btn-ready { background: #d4af37; color: #1a0033; border: none; padding: 18px 30px; border-radius: 40px; font-weight: bold; font-size: 16px; margin-top: 25px; width: 100%; display: none; cursor: pointer; animation: pulse 1.5s infinite; text-transform: uppercase; }
         #status { font-size: 14px; color: #bbb; margin-top: 15px; line-height: 1.4; }
-        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); } 100% { transform: scale(1); } }
+        @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Empire Hits</h2>
         <video id="empireVideo" playsinline controls preload="auto">
-            <source src="https://www.dropbox.com/scl/fi/6lgzb8czg5xjwysoghqyg/Empire-Hits-3.mp4?rlkey=gf9e3suidr6gh6bahx2vq7aey&st=feb945o9?raw=1" type="video/mp4">
+            <source src="https://dl.dropboxusercontent.com/scl/fi/2iiupz1ubmyrat5i5ogi9/Empire-Hits-2-1.mp4?rlkey=dzwpychgw5tjivi46x594a266" type="video/mp4">
         </video>
-        <p id="status">Assista 80% do episódio <b>com som</b><br>para liberar sua pergunta oficial.</p>
+        <p id="status">Aguardando carregamento...</p>
         <button id="quizBtn" class="btn-ready" onclick="enviarSinal()">🏆 LIBERAR PERGUNTA</button>
     </div>
 
@@ -35,6 +35,16 @@
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
 
+        // Se o vídeo der erro de carregamento, avisa na hora
+        video.onerror = function() {
+            status.innerHTML = "❌ <b>Erro ao carregar vídeo.</b><br>Verifique o link no GitHub.";
+            status.style.color = "#ff4d4d";
+        };
+
+        video.onloadeddata = function() {
+            status.innerHTML = "Assista 80% do episódio <b>com som</b><br>para liberar sua pergunta oficial.";
+        };
+
         function mostrarBotao() {
             if (!metaBatida) {
                 metaBatida = true;
@@ -44,7 +54,10 @@
         }
 
         video.onseeking = function() {
-            if (video.currentTime > lastTime) { video.currentTime = lastTime; }
+            // Só bloqueia o "pulo" se o vídeo já tiver começado (evita o Zero-Lock)
+            if (video.currentTime > lastTime && lastTime > 1) {
+                video.currentTime = lastTime;
+            }
         };
 
         video.ontimeupdate = function() {
@@ -55,18 +68,16 @@
             if (progresso >= 0.8 && volumeOk) { mostrarBotao(); }
         };
 
-        // TRAVA DE SEGURANÇA: Se o vídeo acabar, o botão TEM que aparecer
         video.onended = function() { mostrarBotao(); };
 
         function enviarSinal() {
             const urlParams = new URLSearchParams(window.location.search);
             const mId = urlParams.get('msgid');
-            const botUsername = "EmpireHitsBot"; // CONFIRME SE O SEU BOT É ESSE MESMO
+            const botUsername = "EmpireHitsBot"; 
 
             btn.innerText = "⌛ REDIRECIONANDO...";
             btn.disabled = true;
 
-            // Deep Link para voltar ao chat e avisar o robô
             const deepLink = "https://t.me/" + botUsername + "?start=VALIDADO_" + mId;
             window.Telegram.WebApp.openTelegramLink(deepLink);
             
